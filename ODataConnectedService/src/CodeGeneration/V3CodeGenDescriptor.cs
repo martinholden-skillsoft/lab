@@ -27,23 +27,29 @@ namespace Microsoft.OData.ConnectedService.CodeGeneration
         {
             await this.Context.Logger.WriteMessageAsync(LoggerMessageCategory.Information, "Adding Nuget Packages");
 
-            var wcfDSInstallLocation = CodeGeneratorUtils.GetWCFDSInstallLocation();
-            var packageSource = Path.Combine(wcfDSInstallLocation, @"bin\NuGet");
-            if (Directory.Exists(packageSource))
-            {
-                var files = Directory.EnumerateFiles(packageSource, "*.nupkg").ToList();
-                foreach (var nugetPackage in Common.Constants.V3NuGetPackages)
-                {
-                    if (!files.Any(f => Regex.IsMatch(f, nugetPackage + @"(.\d){2,4}.nupkg")))
-                    {
-                        packageSource = Common.Constants.NuGetOnlineRepository;
-                    }
-                }
-            }
-            else
-            {
-                packageSource = Common.Constants.NuGetOnlineRepository;
-            }
+            //Removed dependency on installed version of WCF Data Services.
+            //The call to CodeGeneratorUtils.GetWCFDSInstallLocation() results in a NULL response if not installed
+            //This then caused the Path.Combine to throw exception
+            //This manifests as an error when adding/refreshing proxy of:
+            // Adding OData Connected Service to the project failed: Value cannot be null. Parameter name: path1
+
+            //var wcfDSInstallLocation = CodeGeneratorUtils.GetWCFDSInstallLocation();
+            //var packageSource = Path.Combine(wcfDSInstallLocation, @"bin\NuGet");
+            //if (Directory.Exists(packageSource))
+            //{
+            //    var files = Directory.EnumerateFiles(packageSource, "*.nupkg").ToList();
+            //    foreach (var nugetPackage in Common.Constants.V3NuGetPackages)
+            //    {
+            //        if (!files.Any(f => Regex.IsMatch(f, nugetPackage + @"(.\d){2,4}.nupkg")))
+            //        {
+            //            packageSource = Common.Constants.NuGetOnlineRepository;
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    packageSource = Common.Constants.NuGetOnlineRepository;
+            //}
 
             if (!PackageInstallerServices.IsPackageInstalled(this.Project, this.ClientNuGetPackageName))
             {
