@@ -5,11 +5,13 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Security;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.OData.ConnectedService.Common;
 using Microsoft.OData.ConnectedService.Models;
 using Microsoft.OData.ConnectedService.Views;
+using Microsoft.SharePoint.Client;
 using Microsoft.VisualStudio.ConnectedServices;
 
 namespace Microsoft.OData.ConnectedService.ViewModels
@@ -19,6 +21,10 @@ namespace Microsoft.OData.ConnectedService.ViewModels
         private UserSettings userSettings;
 
         public string Endpoint { get; set; }
+
+        public string SharePointOnlineUsername { get; set; }
+        public string SharePointOnlinePassword { get; set; }
+
         public string ServiceName { get; set; }
         public Version EdmxVersion { get; set; }
         public string MetadataTempPath { get; set; }
@@ -34,6 +40,9 @@ namespace Microsoft.OData.ConnectedService.ViewModels
             this.Legend = "Endpoint";
             this.View = new ConfigODataEndpoint();
             this.ServiceName = Constants.DefaultServiceName;
+
+            this.SharePointOnlineUsername = "";
+            this.SharePointOnlinePassword = "";
             this.View.DataContext = this;
             this.userSettings = userSettings;
         }
@@ -67,7 +76,7 @@ namespace Microsoft.OData.ConnectedService.ViewModels
                 throw new ArgumentNullException("OData Service Endpoint", "Please input the service endpoint");
             }
 
-            if (this.Endpoint.StartsWith("https:", StringComparison.Ordinal) 
+            if (this.Endpoint.StartsWith("https:", StringComparison.Ordinal)
                 || this.Endpoint.StartsWith("http", StringComparison.Ordinal))
             {
                 if (!this.Endpoint.EndsWith("$metadata", StringComparison.Ordinal))
@@ -83,6 +92,18 @@ namespace Microsoft.OData.ConnectedService.ViewModels
                     Credentials = CredentialCache.DefaultNetworkCredentials
                 }
             };
+
+            if (!String.IsNullOrEmpty(this.SharePointOnlineUsername))
+            {
+                SecureString password = new SecureString();
+                foreach (char c in this.SharePointOnlinePassword.ToCharArray()) password.AppendChar(c);
+                SharePointOnlineCredentials spcredentials = new SharePointOnlineCredentials(this.SharePointOnlineUsername, password);
+
+                readerSettings.XmlResolver = new SharePointXMLUrlResolver()
+                {
+                    Credentials = spcredentials
+                };
+            }
 
             string workFile = Path.GetTempFileName();
 

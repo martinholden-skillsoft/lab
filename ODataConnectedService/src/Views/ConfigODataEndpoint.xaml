@@ -24,5 +24,13 @@
                   Margin="20, 5, 5, 0" IsEditable="True"
                   ItemsSource="{Binding Path=UserSettings.MruEndpoints}"
                   Text="{Binding Path=Endpoint, TargetNullValue='Enter your endpoint...' }"/>
+        <TextBlock x:Name="SharePointOnlineUsername1" Text="SharePoint Online Username： "
+            HorizontalAlignment="Left" Margin="0,5"/>
+        <TextBox x:Name="SharePointOnlineUsername" Text="{Binding SharePointOnlineUsername}"
+            HorizontalAlignment="Left" Margin="20,5,0,5"  Width="250"/>
+        <TextBlock x:Name="SharePointOnlinePassword1" Text="SharePoint Online Password： "
+            HorizontalAlignment="Left" Margin="0,5"/>
+        <TextBox x:Name="SharePointOnlinePassword" Text="{Binding SharePointOnlinePassword}"
+            HorizontalAlignment="Left" Margin="20,5,0,5"  Width="250"/>
     </StackPanel>
 </UserControl>
