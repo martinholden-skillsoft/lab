@@ -37,7 +37,7 @@ namespace Microsoft.OData.ConnectedService.CodeGeneration
 
         public override async Task AddGeneratedClientCode()
         {
-            await this.Context.Logger.WriteMessageAsync(LoggerMessageCategory.Information, "Generating Client Proxy ...");
+            await this.Context.Logger.WriteMessageAsync(LoggerMessageCategory.Information, "Generating Client Proxy v4 ...");
 
             if (this.ServiceConfiguration.IncludeT4File)
             {

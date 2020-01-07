@@ -5,11 +5,13 @@ using System;
 using System.Data.Services.Design;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using EnvDTE;
 using Microsoft.OData.ConnectedService.Common;
+using Microsoft.SharePoint.Client;
 using Microsoft.VisualStudio.ConnectedServices;
 
 namespace Microsoft.OData.ConnectedService.CodeGeneration
@@ -60,7 +62,7 @@ namespace Microsoft.OData.ConnectedService.CodeGeneration
 
         public async override Task AddGeneratedClientCode()
         {
-            await this.Context.Logger.WriteMessageAsync(LoggerMessageCategory.Information, "Generating Client Proxy ...");
+            await this.Context.Logger.WriteMessageAsync(LoggerMessageCategory.Information, "Generating Client Proxy v3 ...");
 
             EntityClassGenerator generator = new EntityClassGenerator(LanguageOption.GenerateCSharpCode);
             generator.UseDataServiceCollection = this.ServiceConfiguration.UseDataServiceCollection;
@@ -74,11 +76,24 @@ namespace Microsoft.OData.ConnectedService.CodeGeneration
                 }
             };
 
+            if (!String.IsNullOrEmpty(this.ServiceConfiguration.SharePointOnlineUsername))
+            {
+                SecureString password = new SecureString();
+                foreach (char c in this.ServiceConfiguration.SharePointOnlinePassword.ToCharArray()) password.AppendChar(c);
+                SharePointOnlineCredentials spcredentials = new SharePointOnlineCredentials(this.ServiceConfiguration.SharePointOnlineUsername, password);
+
+                settings.XmlResolver = new SharePointXMLUrlResolver()
+                {
+                    Credentials = spcredentials
+                };
+            }
+
+
             using (XmlReader reader = XmlReader.Create(this.MetadataUri, settings))
             {
                 string tempFile = Path.GetTempFileName();
 
-                using (StreamWriter writer = File.CreateText(tempFile))
+                using (StreamWriter writer = System.IO.File.CreateText(tempFile))
                 {
                     var errors = generator.GenerateCode(reader, writer, this.ServiceConfiguration.NamespacePrefix);
                     await writer.FlushAsync();

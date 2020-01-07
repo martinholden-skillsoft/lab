@@ -62,7 +62,7 @@ namespace Microsoft.OData.ConnectedService
                 ConfigODataEndpointViewModel.EdmxVersion = serviceConfig.EdmxVersion;
                 ConfigODataEndpointViewModel.ServiceName = serviceConfig.ServiceName;
                 var configODataEndpoint = (ConfigODataEndpointViewModel.View as ConfigODataEndpoint);
-                configODataEndpoint.IsEnabled = false;
+                configODataEndpoint.IsEnabled = true;
 
                 //Restore the advanced settings to UI elements.
                 AdvancedSettingsViewModel.PageEntering += (sender, args) =>
@@ -127,6 +127,10 @@ namespace Microsoft.OData.ConnectedService
             }
 
             serviceConfiguration.ServiceName = ConfigODataEndpointViewModel.ServiceName;
+
+            serviceConfiguration.SharePointOnlineUsername = ConfigODataEndpointViewModel.SharePointOnlineUsername;
+            serviceConfiguration.SharePointOnlinePassword = ConfigODataEndpointViewModel.SharePointOnlinePassword;
+
             serviceConfiguration.Endpoint = ConfigODataEndpointViewModel.Endpoint;
             serviceConfiguration.EdmxVersion = ConfigODataEndpointViewModel.EdmxVersion;
             serviceConfiguration.UseDataServiceCollection = AdvancedSettingsViewModel.UseDataServiceCollection;

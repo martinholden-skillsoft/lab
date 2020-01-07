@@ -23,11 +23,13 @@ namespace Microsoft.OData.ConnectedService
 
             var codeGenDescriptor = await GenerateCode(codeGenInstance.MetadataTempFilePath, codeGenInstance.ServiceConfig.EdmxVersion, context, project);
 
+
+
             context.SetExtendedDesignerData<ServiceConfiguration>(codeGenInstance.ServiceConfig);
 
             var result = new AddServiceInstanceResult(
                 context.ServiceInstance.Name,
-                new Uri(codeGenDescriptor.ClientDocUri));
+                null);
 
             return result;
         }
