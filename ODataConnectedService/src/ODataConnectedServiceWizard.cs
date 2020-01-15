@@ -61,6 +61,8 @@ namespace Microsoft.OData.ConnectedService
                 ConfigODataEndpointViewModel.Endpoint = serviceConfig.Endpoint;
                 ConfigODataEndpointViewModel.EdmxVersion = serviceConfig.EdmxVersion;
                 ConfigODataEndpointViewModel.ServiceName = serviceConfig.ServiceName;
+                ConfigODataEndpointViewModel.CredentialsNeeded = serviceConfig.CredentialsNeeded;
+                ConfigODataEndpointViewModel.SaveCredentials = serviceConfig.SaveCredentials;
                 var configODataEndpoint = (ConfigODataEndpointViewModel.View as ConfigODataEndpoint);
                 configODataEndpoint.IsEnabled = true;
 
@@ -128,11 +130,15 @@ namespace Microsoft.OData.ConnectedService
 
             serviceConfiguration.ServiceName = ConfigODataEndpointViewModel.ServiceName;
 
-            serviceConfiguration.SharePointOnlineUsername = ConfigODataEndpointViewModel.SharePointOnlineUsername;
-            serviceConfiguration.SharePointOnlinePassword = ConfigODataEndpointViewModel.SharePointOnlinePassword;
+            serviceConfiguration.Credentials = ConfigODataEndpointViewModel.Credentials;
 
             serviceConfiguration.Endpoint = ConfigODataEndpointViewModel.Endpoint;
             serviceConfiguration.EdmxVersion = ConfigODataEndpointViewModel.EdmxVersion;
+
+            serviceConfiguration.CredentialsNeeded = ConfigODataEndpointViewModel.CredentialsNeeded;
+
+            serviceConfiguration.SaveCredentials = ConfigODataEndpointViewModel.SaveCredentials;
+
             serviceConfiguration.UseDataServiceCollection = AdvancedSettingsViewModel.UseDataServiceCollection;
             serviceConfiguration.GeneratedFileNamePrefix = AdvancedSettingsViewModel.GeneratedFileName;
             serviceConfiguration.UseNameSpacePrefix = AdvancedSettingsViewModel.UseNamespacePrefix;

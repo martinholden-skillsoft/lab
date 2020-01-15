@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using EnvDTE;
 using Microsoft.OData.ConnectedService.Common;
@@ -21,6 +22,7 @@ namespace Microsoft.OData.ConnectedService.CodeGeneration
         public ServiceConfiguration ServiceConfiguration { get; set; }
         public Project Project { get; private set; }
         public string MetadataUri { get; private set; }
+
         public string ClientNuGetPackageName { get; set; }
         public string ClientDocUri { get; set; }
         protected string GeneratedFileNamePrefix

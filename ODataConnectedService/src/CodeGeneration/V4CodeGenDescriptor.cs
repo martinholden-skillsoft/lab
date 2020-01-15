@@ -77,13 +77,16 @@ namespace Microsoft.OData.ConnectedService.CodeGeneration
 
         private async Task AddGeneratedCSharpCode()
         {
-            ODataT4CodeGenerator t4CodeGenerator = new ODataT4CodeGenerator();
-            t4CodeGenerator.MetadataDocumentUri = MetadataUri;
-            t4CodeGenerator.UseDataServiceCollection = this.ServiceConfiguration.UseDataServiceCollection;
-            t4CodeGenerator.TargetLanguage = ODataT4CodeGenerator.LanguageOption.CSharp;
-            t4CodeGenerator.IgnoreUnexpectedElementsAndAttributes = this.ServiceConfiguration.IgnoreUnexpectedElementsAndAttributes;
-            t4CodeGenerator.EnableNamingAlias = this.ServiceConfiguration.EnableNamingAlias;
-            t4CodeGenerator.NamespacePrefix = this.ServiceConfiguration.NamespacePrefix;
+            ODataT4CodeGenerator t4CodeGenerator = new ODataT4CodeGenerator
+            {
+                MetadataDocumentUri = MetadataUri,
+                UseDataServiceCollection = this.ServiceConfiguration.UseDataServiceCollection,
+                TargetLanguage = ODataT4CodeGenerator.LanguageOption.CSharp,
+                IgnoreUnexpectedElementsAndAttributes = this.ServiceConfiguration.IgnoreUnexpectedElementsAndAttributes,
+                EnableNamingAlias = this.ServiceConfiguration.EnableNamingAlias,
+                NamespacePrefix = this.ServiceConfiguration.NamespacePrefix
+            };
+            //t4CodeGenerator.Credentials = this.ServiceConfiguration.Credentials;
 
             string tempFile = Path.GetTempFileName();
 

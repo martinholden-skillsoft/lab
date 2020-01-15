@@ -29,30 +29,6 @@ namespace Microsoft.OData.ConnectedService.CodeGeneration
         {
             await this.Context.Logger.WriteMessageAsync(LoggerMessageCategory.Information, "Adding Nuget Packages");
 
-            //Removed dependency on installed version of WCF Data Services.
-            //The call to CodeGeneratorUtils.GetWCFDSInstallLocation() results in a NULL response if not installed
-            //This then caused the Path.Combine to throw exception
-            //This manifests as an error when adding/refreshing proxy of:
-            // Adding OData Connected Service to the project failed: Value cannot be null. Parameter name: path1
-
-            //var wcfDSInstallLocation = CodeGeneratorUtils.GetWCFDSInstallLocation();
-            //var packageSource = Path.Combine(wcfDSInstallLocation, @"bin\NuGet");
-            //if (Directory.Exists(packageSource))
-            //{
-            //    var files = Directory.EnumerateFiles(packageSource, "*.nupkg").ToList();
-            //    foreach (var nugetPackage in Common.Constants.V3NuGetPackages)
-            //    {
-            //        if (!files.Any(f => Regex.IsMatch(f, nugetPackage + @"(.\d){2,4}.nupkg")))
-            //        {
-            //            packageSource = Common.Constants.NuGetOnlineRepository;
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    packageSource = Common.Constants.NuGetOnlineRepository;
-            //}
-
             if (!PackageInstallerServices.IsPackageInstalled(this.Project, this.ClientNuGetPackageName))
             {
                 Version packageVersion = null;
@@ -64,32 +40,30 @@ namespace Microsoft.OData.ConnectedService.CodeGeneration
         {
             await this.Context.Logger.WriteMessageAsync(LoggerMessageCategory.Information, "Generating Client Proxy v3 ...");
 
-            EntityClassGenerator generator = new EntityClassGenerator(LanguageOption.GenerateCSharpCode);
-            generator.UseDataServiceCollection = this.ServiceConfiguration.UseDataServiceCollection;
-            generator.Version = DataServiceCodeVersion.V3;
-
-            XmlReaderSettings settings = new XmlReaderSettings()
+            EntityClassGenerator generator = new EntityClassGenerator(LanguageOption.GenerateCSharpCode)
             {
-                XmlResolver = new XmlUrlResolver()
-                {
-                    Credentials = System.Net.CredentialCache.DefaultNetworkCredentials
-                }
+                UseDataServiceCollection = this.ServiceConfiguration.UseDataServiceCollection,
+                Version = DataServiceCodeVersion.V3
             };
 
-            if (!String.IsNullOrEmpty(this.ServiceConfiguration.SharePointOnlineUsername))
+            XmlReaderSettings readerSettings = new XmlReaderSettings();
+            if (this.ServiceConfiguration.Credentials?.GetType() == typeof(SharePointOnlineCredentials))
             {
-                SecureString password = new SecureString();
-                foreach (char c in this.ServiceConfiguration.SharePointOnlinePassword.ToCharArray()) password.AppendChar(c);
-                SharePointOnlineCredentials spcredentials = new SharePointOnlineCredentials(this.ServiceConfiguration.SharePointOnlineUsername, password);
-
-                settings.XmlResolver = new SharePointXMLUrlResolver()
+                readerSettings.XmlResolver = new SharePointXMLUrlResolver()
                 {
-                    Credentials = spcredentials
+                    Credentials = this.ServiceConfiguration.Credentials
+                };
+            }
+            else
+            {
+                readerSettings.XmlResolver = new XmlUrlResolver()
+                {
+                    Credentials = this.ServiceConfiguration.Credentials
                 };
             }
 
 
-            using (XmlReader reader = XmlReader.Create(this.MetadataUri, settings))
+            using (XmlReader reader = XmlReader.Create(this.MetadataUri, readerSettings))
             {
                 string tempFile = Path.GetTempFileName();
 

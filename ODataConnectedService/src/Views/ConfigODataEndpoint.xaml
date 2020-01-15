@@ -24,13 +24,13 @@
                   Margin="20, 5, 5, 0" IsEditable="True"
                   ItemsSource="{Binding Path=UserSettings.MruEndpoints}"
                   Text="{Binding Path=Endpoint, TargetNullValue='Enter your endpoint...' }"/>
-        <TextBlock x:Name="SharePointOnlineUsername1" Text="SharePoint Online Username： "
-            HorizontalAlignment="Left" Margin="0,5"/>
-        <TextBox x:Name="SharePointOnlineUsername" Text="{Binding SharePointOnlineUsername}"
-            HorizontalAlignment="Left" Margin="20,5,0,5"  Width="250"/>
-        <TextBlock x:Name="SharePointOnlinePassword1" Text="SharePoint Online Password： "
-            HorizontalAlignment="Left" Margin="0,5"/>
-        <TextBox x:Name="SharePointOnlinePassword" Text="{Binding SharePointOnlinePassword}"
-            HorizontalAlignment="Left" Margin="20,5,0,5"  Width="250"/>
+        <StackPanel x:Name="AuthenticationSettingsv3" HorizontalAlignment="Left" Margin="10, 10, 5 , 0" VerticalAlignment="Top">
+            <CheckBox x:Name="CredentialsNeeded" Content="Authentication Needed" IsChecked="{Binding CredentialsNeeded}"
+            		HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 5" Checked="CredentialsNeeded_Checked" Unchecked="CredentialsNeeded_Unchecked"/>
+            <CheckBox x:Name="ResetCredentials" Content="Reset Saved Credentials in Windows Credential Manager" IsChecked="{Binding ResetCredentials}" IsEnabled="{Binding CredentialsNeeded}"
+            		HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20, 5"/>
+            <CheckBox x:Name="SaveCredentials" Content="Save Credentials in Windows Credential Manager" IsChecked="{Binding SaveCredentials}"  IsEnabled="{Binding CredentialsNeeded}"
+            		HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20, 5"/>
+        </StackPanel>
     </StackPanel>
 </UserControl>

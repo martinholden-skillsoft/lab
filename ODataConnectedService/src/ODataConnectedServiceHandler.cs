@@ -20,10 +20,7 @@ namespace Microsoft.OData.ConnectedService
         {
             Project project = ProjectHelper.GetProjectFromHierarchy(context.ProjectHierarchy);
             ODataConnectedServiceInstance codeGenInstance = (ODataConnectedServiceInstance)context.ServiceInstance;
-
-            var codeGenDescriptor = await GenerateCode(codeGenInstance.MetadataTempFilePath, codeGenInstance.ServiceConfig.EdmxVersion, context, project);
-
-
+            _ = await GenerateCode(codeGenInstance.ServiceConfig.Endpoint, codeGenInstance.ServiceConfig.EdmxVersion, context, project);
 
             context.SetExtendedDesignerData<ServiceConfiguration>(codeGenInstance.ServiceConfig);
 
@@ -38,8 +35,7 @@ namespace Microsoft.OData.ConnectedService
         {
             Project project = ProjectHelper.GetProjectFromHierarchy(context.ProjectHierarchy);
             ODataConnectedServiceInstance codeGenInstance = (ODataConnectedServiceInstance)context.ServiceInstance;
-
-            var codeGenDescriptor = await GenerateCode(codeGenInstance.ServiceConfig.Endpoint, codeGenInstance.ServiceConfig.EdmxVersion, context, project);
+            _ = await GenerateCode(codeGenInstance.ServiceConfig.Endpoint, codeGenInstance.ServiceConfig.EdmxVersion, context, project);
             context.SetExtendedDesignerData<ServiceConfiguration>(codeGenInstance.ServiceConfig);
             return new UpdateServiceInstanceResult();
         }

@@ -8,6 +8,7 @@ using System.Net;
 using System.Security;
 using System.Threading.Tasks;
 using System.Xml;
+using AdysTech.CredentialManager;
 using Microsoft.OData.ConnectedService.Common;
 using Microsoft.OData.ConnectedService.Models;
 using Microsoft.OData.ConnectedService.Views;
@@ -21,13 +22,13 @@ namespace Microsoft.OData.ConnectedService.ViewModels
         private UserSettings userSettings;
 
         public string Endpoint { get; set; }
-
-        public string SharePointOnlineUsername { get; set; }
-        public string SharePointOnlinePassword { get; set; }
-
         public string ServiceName { get; set; }
         public Version EdmxVersion { get; set; }
         public string MetadataTempPath { get; set; }
+        public bool ResetCredentials { get; set; }
+        public bool SaveCredentials { get; set; }
+        public bool CredentialsNeeded { get; set;  }
+        public ICredentials Credentials { get; private set; }
         public UserSettings UserSettings
         {
             get { return this.userSettings; }
@@ -40,20 +41,19 @@ namespace Microsoft.OData.ConnectedService.ViewModels
             this.Legend = "Endpoint";
             this.View = new ConfigODataEndpoint();
             this.ServiceName = Constants.DefaultServiceName;
-
-            this.SharePointOnlineUsername = "";
-            this.SharePointOnlinePassword = "";
             this.View.DataContext = this;
+            this.ResetCredentials = false;
+            this.SaveCredentials = true;
+            this.CredentialsNeeded = true;
             this.userSettings = userSettings;
         }
 
         public override Task<PageNavigationResult> OnPageLeavingAsync(WizardLeavingArgs args)
         {
             UserSettings.AddToTopOfMruList(((ODataConnectedServiceWizard)this.Wizard).UserSettings.MruEndpoints, this.Endpoint);
-            Version version;
             try
             {
-                this.MetadataTempPath = GetMetadata(out version);
+                this.MetadataTempPath = GetMetadata(out Version version);
                 this.EdmxVersion = version;
                 return base.OnPageLeavingAsync(args);
             }
@@ -69,8 +69,64 @@ namespace Microsoft.OData.ConnectedService.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets the credentials.
+        /// </summary>
+        /// <returns></returns>
+        private ICredentials GetCredentials()
+        {
+            if (this.CredentialsNeeded)
+            {
+                string listhostname = new Uri(this.Endpoint).Host;
+                bool save = false;
+
+                if (this.ResetCredentials)
+                {
+                    CredentialManager.RemoveCredentials(listhostname);
+                }
+
+                NetworkCredential cred;
+                cred = CredentialManager.GetCredentials(listhostname, CredentialManager.CredentialType.Generic);
+
+                if (cred == null)
+                {
+                    cred = CredentialManager.PromptForCredentials(listhostname, ref save, "Please provide Credentials for " + listhostname, "Credentials");
+                }
+
+                if (cred != null)
+                {
+                    if (this.SaveCredentials)
+                    {
+                        CredentialManager.SaveCredentials(listhostname, cred);
+                    }
+
+                    if (listhostname.EndsWith(".sharepoint.com"))
+                    {
+                        return new SharePointOnlineCredentials(cred.UserName, cred.SecurePassword);
+                    }
+                    else
+                    {
+                        return new NetworkCredential(cred.UserName, cred.SecurePassword);
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the metadata.
+        /// </summary>
+        /// <param name="edmxVersion">The edmx version.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">OData Service Endpoint - Please input the service endpoint</exception>
+        /// <exception cref="InvalidOperationException">
+        /// The metadata is an empty file
+        /// or
+        /// </exception>
         private string GetMetadata(out Version edmxVersion)
         {
+            this.Credentials = null;
+
             if (String.IsNullOrEmpty(this.Endpoint))
             {
                 throw new ArgumentNullException("OData Service Endpoint", "Please input the service endpoint");
@@ -83,25 +139,23 @@ namespace Microsoft.OData.ConnectedService.ViewModels
                 {
                     this.Endpoint = this.Endpoint.TrimEnd('/') + "/$metadata";
                 }
+                this.Credentials = GetCredentials();
             }
 
-            XmlReaderSettings readerSettings = new XmlReaderSettings()
-            {
-                XmlResolver = new XmlUrlResolver()
-                {
-                    Credentials = CredentialCache.DefaultNetworkCredentials
-                }
-            };
+            XmlReaderSettings readerSettings = new XmlReaderSettings();
 
-            if (!String.IsNullOrEmpty(this.SharePointOnlineUsername))
+            if (this.Credentials?.GetType() == typeof(SharePointOnlineCredentials))
             {
-                SecureString password = new SecureString();
-                foreach (char c in this.SharePointOnlinePassword.ToCharArray()) password.AppendChar(c);
-                SharePointOnlineCredentials spcredentials = new SharePointOnlineCredentials(this.SharePointOnlineUsername, password);
-
                 readerSettings.XmlResolver = new SharePointXMLUrlResolver()
                 {
-                    Credentials = spcredentials
+                    Credentials = this.Credentials
+                };
+            }
+            else
+            {
+                readerSettings.XmlResolver = new XmlUrlResolver()
+                {
+                    Credentials = this.Credentials
                 };
             }
 
